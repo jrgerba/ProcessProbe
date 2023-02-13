@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using ProcessProbe.MemoryInterface;
+using ProcessProbe.MemoryInterface.Linux;
 using ProcessProbe.MemoryInterface.Windows;
 
 namespace ProcessProbe;
@@ -102,6 +103,10 @@ public class Probe
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             _memory = new WindowsMemoryInterface(_proc);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            _memory = new LinuxMemoryInterface(_proc);
         }
         else
         {
