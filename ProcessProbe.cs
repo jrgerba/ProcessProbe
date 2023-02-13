@@ -6,6 +6,40 @@ namespace ProcessProbe;
 
 public class ProcessProbe
 {
+    // Static //
+    private static Dictionary<Type, bool> _safetyLookup = new(); 
+
+    private static void EnforceTypeSafety<T>() => EnforceTypeSafety(typeof(T));
+
+    private static void EnforceTypeSafety(Type t)
+    {
+        if (safetyLookup.TryGetValue(t, out bool isSafe))
+        {
+            if (isSafe)
+                return;
+
+            throw new UnsafeTypeException("The given type cannot be a reference");
+        }
+
+        if (t.IsPrimitive)
+            return;
+
+        if (t.IsByRef)
+            throw new UnsafeTypeException("The given type cannot be a reference");
+
+        FieldInfo[] fields = t.GetFields();
+
+        for (int i = 0; i < fields.Length; i++)
+        {
+            FieldInfo f = fields[i];
+            EnforceTypeSafety(f.FieldType);
+        }
+
+        safetyLookup.Add(t, true);
+    }
+
+    // Instance //
+
     private readonly IMemoryInterface _memory;
     private readonly Process _proc;
 
@@ -50,25 +84,6 @@ public class ProcessProbe
             Span<byte> buffer = new(bufferPtr, SizeOf<T>.Size * array.Length);
 
             return _memory.Write(address, buffer);
-        }
-    }
-
-    private static void EnforceTypeSafety<T>() => EnforceTypeSafety(typeof(T));
-
-    private static void EnforceTypeSafety(Type t)
-    {
-        if (t.IsPrimitive)
-            return;
-
-        if (t.IsByRef)
-            throw new UnsafeTypeException("The given type cannot be a reference");
-
-        FieldInfo[] fields = t.GetFields();
-
-        for (int i = 0; i < fields.Length; i++)
-        {
-            FieldInfo f = fields[i];
-            EnforceTypeSafety(f.FieldType);
         }
     }
 }
