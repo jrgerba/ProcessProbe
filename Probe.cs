@@ -51,18 +51,24 @@ public class Probe
 
         value = default;
 
-        Span<byte> buffer = new(&value, SizeOf<T>.Size);
+        fixed (void* valueAddr = &value)
+        {
+            Span<byte> buffer = new(valueAddr, SizeOf<T>.Size);
 
-        return _memory.Read(address, buffer);
+            return _memory.Read(address, buffer);
+        }
     }
 
     public unsafe int Write<T>(nint address, out T value) where T : struct
     {
         EnforceTypeSafety<T>();
 
-        Span<byte> buffer = new(&value, SizeOf<T>.Size);
+        fixed (void* valueAddr = &value)
+        {
+            Span<byte> buffer = new(valueAddr, SizeOf<T>.Size);
 
-        return _memory.Write(address, buffer);
+            return _memory.Write(address, buffer);
+        }
     }
 
     public unsafe int ReadArray<T>(nint address, Span<T> array) where T : struct
