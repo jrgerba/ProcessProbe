@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using ProcessProbe.MemoryInterface;
+using ProcessProbe.MemoryInterface.Windows;
 
 namespace ProcessProbe;
 
@@ -13,7 +15,7 @@ public class ProcessProbe
 
     private static void EnforceTypeSafety(Type t)
     {
-        if (safetyLookup.TryGetValue(t, out bool isSafe))
+        if (_safetyLookup.TryGetValue(t, out bool isSafe))
         {
             if (isSafe)
                 return;
@@ -35,7 +37,7 @@ public class ProcessProbe
             EnforceTypeSafety(f.FieldType);
         }
 
-        safetyLookup.Add(t, true);
+        _safetyLookup.Add(t, true);
     }
 
     // Instance //
@@ -67,7 +69,7 @@ public class ProcessProbe
     {
         EnforceTypeSafety<T>();
 
-        fixed (void* bufferPtr = &array.GetPinnableReference())
+        fixed (void* bufferPtr = array)
         {
             Span<byte> buffer = new(bufferPtr, SizeOf<T>.Size * array.Length);
 
@@ -79,11 +81,25 @@ public class ProcessProbe
     {
         EnforceTypeSafety<T>();
 
-        fixed (void* bufferPtr = &array.GetPinnableReference())
+        fixed (void* bufferPtr = array)
         {
             Span<byte> buffer = new(bufferPtr, SizeOf<T>.Size * array.Length);
 
             return _memory.Write(address, buffer);
+        }
+    }
+
+    public ProcessProbe(Process proc)
+    {
+        _proc = proc;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _memory = new WindowsMemoryInterface(_proc);
+        }
+        else
+        {
+            throw new NotSupportedException("The given operating system is not supported");
         }
     }
 }
