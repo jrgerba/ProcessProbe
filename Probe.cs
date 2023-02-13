@@ -6,7 +6,7 @@ using ProcessProbe.MemoryInterface.Windows;
 
 namespace ProcessProbe;
 
-public class ProcessProbe
+public class Probe
 {
     // Static //
     private static Dictionary<Type, bool> _safetyLookup = new(); 
@@ -89,7 +89,7 @@ public class ProcessProbe
         }
     }
 
-    public ProcessProbe(Process proc)
+    public Probe(Process proc)
     {
         _proc = proc;
 
