@@ -8,7 +8,7 @@ public static class SizeOf<T>
 
     static SizeOf()
     {
-        DynamicMethod dm = new("GenericSizeOf", typeof(uint), Array.Empty<Type>());
+        DynamicMethod dm = new("GenericSizeOf", typeof(int), Array.Empty<Type>());
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Sizeof, typeof(T));
         il.Emit(OpCodes.Ret);
