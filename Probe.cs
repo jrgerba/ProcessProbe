@@ -60,7 +60,7 @@ public class Probe
         }
     }
 
-    public unsafe int Write<T>(nint address, out T value) where T : struct
+    public unsafe int Write<T>(nint address, T value) where T : struct
     {
         EnforceTypeSafety<T>();
 
