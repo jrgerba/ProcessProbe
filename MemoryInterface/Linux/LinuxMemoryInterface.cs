@@ -57,6 +57,11 @@ public class LinuxMemoryInterface : IMemoryInterface
         }
     }
 
+    public nint GetExportedObject(string name)
+    {
+        throw new NotImplementedException();
+    }
+
     public void CloseInterface()
     {
         IsOpen = false;
