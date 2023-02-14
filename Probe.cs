@@ -30,7 +30,7 @@ public class Probe
         if (t.IsClass)
             throw new UnsafeTypeException("The given type cannot be a reference");
 
-        FieldInfo[] fields = t.GetFields();
+        FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
         for (int i = 0; i < fields.Length; i++)
         {
