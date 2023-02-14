@@ -60,6 +60,11 @@ public class Probe
         }
     }
 
+    public int Read<T>(nint address, int offset, out T value) where T : struct => Read(address + offset, out value);
+
+    public int Read<T>(string exportName, int offset, out T value) where T : struct =>
+        Read(_memory.GetExportedObject(exportName), offset, out value);
+
     public unsafe int Write<T>(nint address, T value) where T : struct
     {
         EnforceTypeSafety<T>();
@@ -68,6 +73,11 @@ public class Probe
 
         return _memory.Write(address, buffer);
     }
+
+    public int Write<T>(nint address, int offset, T value) where T : struct => Write(address + offset, value);
+
+    public int Write<T>(string exportName, int offset, T value) where T : struct =>
+        Write(_memory.GetExportedObject(exportName), offset, value);
 
     public unsafe int ReadArray<T>(nint address, Span<T> array) where T : struct
     {
@@ -81,6 +91,12 @@ public class Probe
         }
     }
 
+    public int ReadArray<T>(nint address, int offset, Span<T> array) where T : struct =>
+        ReadArray(address + offset, array);
+
+    public int ReadArray<T>(string exportName, int offset, Span<T> array) where T : struct =>
+        ReadArray(_memory.GetExportedObject(exportName) + offset, array);
+
     public unsafe int WriteArray<T>(nint address, Span<T> array) where T : struct
     {
         EnforceTypeSafety<T>();
@@ -92,6 +108,12 @@ public class Probe
             return _memory.Write(address, buffer);
         }
     }
+
+    public int WriteArray<T>(nint address, int offset, Span<T> array) where T : struct =>
+        WriteArray(address + offset, array);
+
+    public int WriteArray<T>(string exportName, int offset, Span<T> array) where T : struct =>
+        WriteArray(_memory.GetExportedObject(exportName), offset, array);
 
     public Probe(Process proc)
     {
