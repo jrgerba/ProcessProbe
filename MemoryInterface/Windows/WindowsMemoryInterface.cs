@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
+using PeNet;
+using PeNet.Header.Pe;
 
 namespace ProcessProbe.MemoryInterface.Windows;
 
@@ -28,6 +31,7 @@ public class WindowsMemoryInterface : IMemoryInterface
         out int lpNumberOfBytesRead);
 
     private readonly Process _proc;
+    private readonly Dictionary<string, nint> _exportMap;
     private readonly nint _handle;
 
     public bool IsOpen { get; private set; }
@@ -48,7 +52,7 @@ public class WindowsMemoryInterface : IMemoryInterface
 
     public unsafe int Write(nint address, Span<byte> buffer)
     {
-        if (IsOpen) 
+        if (!IsOpen) 
             throw new MemoryInterfaceClosedException();
 
         fixed (byte* bufferPtr = buffer)
@@ -59,6 +63,8 @@ public class WindowsMemoryInterface : IMemoryInterface
             return bytesWritten;
         }
     }
+
+    public nint GetExportedObject(string name) => _exportMap.TryGetValue(name, out nint addr) ? addr : nint.Zero;
 
     public void CloseInterface()
     {
@@ -77,6 +83,7 @@ public class WindowsMemoryInterface : IMemoryInterface
     public WindowsMemoryInterface(Process proc)
     {
         _proc = proc;
+        _exportMap = new Dictionary<string, nint>();
         _handle = OpenProcess(DesiredAccess, false, _proc.Id);
 
         if (_handle == nint.Zero)
@@ -86,6 +93,23 @@ public class WindowsMemoryInterface : IMemoryInterface
         _proc.Exited += OnProcessClosed;
 
         IsOpen = true;
+
+        if (_proc.MainModule is null)
+            return;
+
+        PeFile header = new(_proc.MainModule.FileName);
+        ExportFunction[]? exports = header.ExportedFunctions;
+
+        if (exports is null)
+            return;
+
+        int unnamedExports = 0;
+
+        for (int i = 0; i < exports.Length; i++)
+        {
+            ExportFunction export = exports[i];
+            _exportMap.Add(export.Name ?? $"UnnamedExport_{unnamedExports++:3}", (nint)(_proc.MainModule.BaseAddress + export.Address));
+        }
     }
 
     ~WindowsMemoryInterface()
