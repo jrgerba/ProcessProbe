@@ -27,7 +27,7 @@ public class Probe
         if (t.IsPrimitive)
             return;
 
-        if (t.IsByRef)
+        if (t.IsClass)
             throw new UnsafeTypeException("The given type cannot be a reference");
 
         FieldInfo[] fields = t.GetFields();
