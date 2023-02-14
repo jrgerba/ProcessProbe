@@ -6,6 +6,8 @@ public interface IMemoryInterface
 
     public int Write(nint address, Span<byte> buffer);
 
+    public nint GetExportedObject(string name);
+
     public void CloseInterface();
 
     public bool IsOpen { get; }
