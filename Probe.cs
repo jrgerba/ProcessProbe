@@ -64,12 +64,9 @@ public class Probe
     {
         EnforceTypeSafety<T>();
 
-        fixed (void* valueAddr = &value)
-        {
-            Span<byte> buffer = new(valueAddr, SizeOf<T>.Size);
+        Span<byte> buffer = new(&value, SizeOf<T>.Size);
 
-            return _memory.Write(address, buffer);
-        }
+        return _memory.Write(address, buffer);
     }
 
     public unsafe int ReadArray<T>(nint address, Span<T> array) where T : struct
