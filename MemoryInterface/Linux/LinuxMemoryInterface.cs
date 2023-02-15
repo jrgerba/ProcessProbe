@@ -19,8 +19,8 @@ namespace ProcessProbe.MemoryInterface.Linux
         {
             fixed (void* bufferPtr = buffer)
             {
-                var local = new iovec { iov_base = bufferPtr, iov_len = buffer.Length };
-                var remote = new iovec { iov_base = (void*)address, iov_len = buffer.Length };
+                var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
+                var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
                 return process_vm_readv(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
@@ -29,8 +29,8 @@ namespace ProcessProbe.MemoryInterface.Linux
         {
             fixed (void* bufferPtr = buffer)
             {
-                var local = new iovec { iov_base = bufferPtr, iov_len = buffer.Length };
-                var remote = new iovec { iov_base = (void*)address, iov_len = buffer.Length };
+                var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
+                var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
                 return process_vm_writev(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
