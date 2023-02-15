@@ -13,11 +13,11 @@ namespace ProcessProbe
         private static readonly Dictionary<Type, bool> SafetyLookup = new();
 
         private readonly IMemoryInterface _memory;
-        private readonly Process _process;
 
         public Probe(Process process)
         {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
+            if (process == null)
+                throw new ArgumentNullException(nameof(process));
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -31,6 +31,11 @@ namespace ProcessProbe
             {
                 throw new PlatformNotSupportedException("The given operating system is not supported.");
             }
+        }
+
+        ~Probe()
+        {
+            _memory.CloseInterface();
         }
 
         public int Read<T>(nint address, out T value) where T : unmanaged
