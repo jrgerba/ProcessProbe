@@ -1,97 +1,93 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ProcessProbe.MemoryInterface;
 using ProcessProbe.MemoryInterface.Linux;
 using ProcessProbe.MemoryInterface.Windows;
 
-namespace ProcessProbe;
-
-public class Probe
+namespace ProcessProbe
 {
-    // Static //
-    private static readonly Dictionary<Type, bool> SafetyLookup = new(); 
-    
-    // Instance //
-    private readonly IMemoryInterface _memory;
-    private readonly Process _proc;
-
-    public unsafe int Read<T>(nint address, out T value) where T : unmanaged
+    public class Probe
     {
-        value = default;
+        private static readonly Dictionary<Type, bool> SafetyLookup = new();
 
-        fixed (void* valueAddr = &value)
+        private readonly IMemoryInterface _memory;
+        private readonly Process _process;
+
+        public Probe(Process process)
         {
-            Span<byte> buffer = new(valueAddr, sizeof(T));
+            if (process == null)
+            {
+                throw new ArgumentNullException(nameof(process));
+            }
+
+            _process = process;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _memory = new WindowsMemoryInterface(process);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                _memory = new LinuxMemoryInterface(process);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("The given operating system is not supported.");
+            }
+        }
+
+        public int Read<T>(nint address, out T value) where T : unmanaged
+        {
+            value = default;
+
+            Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1));
 
             return _memory.Read(address, buffer);
         }
-    }
 
-    public int Read<T>(nint address, int offset, out T value) where T : unmanaged => Read(address + offset, out value);
+        public int Read<T>(nint address, int offset, out T value) where T : unmanaged => Read(address + offset, out value);
 
-    public int Read<T>(string exportName, int offset, out T value) where T : unmanaged =>
-        Read(_memory.GetExportedObject(exportName), offset, out value);
+        public int Read<T>(string exportName, int offset, out T value) where T : unmanaged => 
+            Read(_memory.GetExportedObject(exportName), offset, out value);
 
-    public unsafe int Write<T>(nint address, T value) where T : unmanaged
-    {
-        Span<byte> buffer = new(&value, sizeof(T));
-
-        return _memory.Write(address, buffer);
-    }
-
-    public int Write<T>(nint address, int offset, T value) where T : unmanaged => Write(address + offset, value);
-
-    public int Write<T>(string exportName, int offset, T value) where T : unmanaged =>
-        Write(_memory.GetExportedObject(exportName), offset, value);
-
-    public unsafe int ReadArray<T>(nint address, Span<T> array) where T : unmanaged
-    {
-        fixed (void* bufferPtr = array)
+        public int Write<T>(nint address, T value) where T : unmanaged
         {
-            Span<byte> buffer = new(bufferPtr, sizeof(T) * array.Length);
-
-            return _memory.Read(address, buffer);
-        }
-    }
-
-    public int ReadArray<T>(nint address, int offset, Span<T> array) where T : unmanaged =>
-        ReadArray(address + offset, array);
-
-    public int ReadArray<T>(string exportName, int offset, Span<T> array) where T : unmanaged =>
-        ReadArray(_memory.GetExportedObject(exportName) + offset, array);
-
-    public unsafe int WriteArray<T>(nint address, Span<T> array) where T : unmanaged
-    {
-        fixed (void* bufferPtr = array)
-        {
-            Span<byte> buffer = new(bufferPtr, sizeof(T) * array.Length);
+            Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1));
 
             return _memory.Write(address, buffer);
         }
-    }
 
-    public int WriteArray<T>(nint address, int offset, Span<T> array) where T : unmanaged =>
-        WriteArray(address + offset, array);
+        public int Write<T>(nint address, int offset, T value) where T : unmanaged => Write(address + offset, value);
 
-    public int WriteArray<T>(string exportName, int offset, Span<T> array) where T : unmanaged =>
-        WriteArray(_memory.GetExportedObject(exportName), offset, array);
+        public int Write<T>(string exportName, int offset, T value) where T : unmanaged => 
+            Write(_memory.GetExportedObject(exportName), offset, value);
 
-    public Probe(Process proc)
-    {
-        _proc = proc;
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        public int ReadArray<T>(nint address, Span<T> array) where T : unmanaged
         {
-            _memory = new WindowsMemoryInterface(_proc);
+            Span<byte> buffer = MemoryMarshal.AsBytes(array);
+
+            return _memory.Read(address, buffer);
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+        public int ReadArray<T>(nint address, int offset, Span<T> array) where T : unmanaged => 
+            ReadArray(address + offset, array);
+
+        public int ReadArray<T>(string exportName, int offset, Span<T> array) where T : unmanaged => 
+            ReadArray(_memory.GetExportedObject(exportName) + offset, array);
+
+        public int WriteArray<T>(nint address, Span<T> array) where T : unmanaged
         {
-            _memory = new LinuxMemoryInterface(_proc);
+            Span<byte> buffer = MemoryMarshal.AsBytes(array);
+
+            return _memory.Write(address, buffer);
         }
-        else
-        {
-            throw new NotSupportedException("The given operating system is not supported");
-        }
+
+        public int WriteArray<T>(nint address, int offset, Span<T> array) where T : unmanaged => 
+            WriteArray(address + offset, array);
+
+        public int WriteArray<T>(string exportName, int offset, Span<T> array) where T : unmanaged => 
+            WriteArray(_memory.GetExportedObject(exportName), offset, array);
     }
 }
