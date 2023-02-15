@@ -17,12 +17,7 @@ namespace ProcessProbe
 
         public Probe(Process process)
         {
-            if (process == null)
-            {
-                throw new ArgumentNullException(nameof(process));
-            }
-
-            _process = process;
+            _process = process ?? throw new ArgumentNullException(nameof(process));
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
