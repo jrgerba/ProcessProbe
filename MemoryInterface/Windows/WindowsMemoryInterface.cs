@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PeNet;
+using PeNet.Header.Pe;
 
 namespace ProcessProbe.MemoryInterface.Windows
 {
