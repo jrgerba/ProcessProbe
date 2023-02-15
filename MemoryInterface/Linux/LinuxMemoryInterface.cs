@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ProcessProbe.MemoryInterface.Linux
 {
-    public class LinuxMemoryInterface : IMemoryInterface
+    internal class LinuxMemoryInterface : IMemoryInterface
     {
         private Process _proc;
 

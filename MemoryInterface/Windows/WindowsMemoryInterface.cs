@@ -7,7 +7,7 @@ using PeNet.Header.Pe;
 
 namespace ProcessProbe.MemoryInterface.Windows
 {
-    public class WindowsMemoryInterface : IMemoryInterface
+    internal class WindowsMemoryInterface : IMemoryInterface
     {
         private const int DesiredAccess = 0x0020 | 0x0010 | 0x0008 | 0x0400;
         private readonly Process _process;
