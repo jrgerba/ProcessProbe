@@ -2,19 +2,22 @@
 
 namespace ProcessProbe.MemoryInterface.Windows
 {
-    internal static class Kernel32
+    internal static partial class Kernel32
     {
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        public static extern nint OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+        [LibraryImport("Kernel32.dll", SetLastError = true)]
+        public static partial nint OpenProcess(int dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
 
-        [DllImport("Kernel32.dll")]
-        public static extern bool CloseHandle(nint hObject);
+        [LibraryImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool CloseHandle(nint hObject);
 
-        [DllImport("Kernel32.dll")]
-        public static extern unsafe bool WriteProcessMemory(nint hProcess, nint lpBaseAddress, byte* lpBuffer, int nSize,
+        [LibraryImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static unsafe partial bool WriteProcessMemory(nint hProcess, nint lpBaseAddress, byte* lpBuffer, int nSize,
             out int lpNumberOfBytesWritten);
-        [DllImport("Kernel32.dll")]
-        public static extern unsafe bool ReadProcessMemory(nint hProcess, nint lpBaseAddress, byte* lpBuffer, int nSize,
+        [LibraryImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static unsafe partial bool ReadProcessMemory(nint hProcess, nint lpBaseAddress, byte* lpBuffer, int nSize,
             out int lpNumberOfBytesRead);
 
     }
