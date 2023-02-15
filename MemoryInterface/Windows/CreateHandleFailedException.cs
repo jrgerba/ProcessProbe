@@ -1,7 +1,8 @@
-﻿namespace ProcessProbe.MemoryInterface.Windows;
-
-public class CreateHandleFailedException : Exception
+﻿namespace ProcessProbe.MemoryInterface.Windows
 {
-    public CreateHandleFailedException() : base() { }
-    public CreateHandleFailedException(string message) : base(message) { }
+    public class CreateHandleFailedException : Exception
+    {
+        public CreateHandleFailedException() : base() { }
+        public CreateHandleFailedException(string message) : base(message) { }
+    }
 }
