@@ -5,12 +5,6 @@ namespace ProcessProbe.MemoryInterface.Linux
 {
     public class LinuxMemoryInterface : IMemoryInterface
     {
-        [DllImport("libc")]
-        private static extern unsafe int process_vm_readv(int pid, iovec* local_iov, ulong liovcnt, iovec* remote_iov, ulong riovcnt, ulong flags);
-
-        [DllImport("libc")]
-        private static extern unsafe int process_vm_writev(int pid, iovec* local_iov, ulong liovcnt, iovec* remote_iov, ulong riovcnt, ulong flags);
-
         private Process _proc;
 
         public bool IsOpen { get; private set; }
@@ -21,7 +15,7 @@ namespace ProcessProbe.MemoryInterface.Linux
             {
                 var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
                 var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
-                return process_vm_readv(_proc.Id, &local, 1, &remote, 1, 0);
+                return Libc.process_vm_readv(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
 
@@ -31,7 +25,7 @@ namespace ProcessProbe.MemoryInterface.Linux
             {
                 var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
                 var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
-                return process_vm_writev(_proc.Id, &local, 1, &remote, 1, 0);
+                return Libc.process_vm_writev(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
 
