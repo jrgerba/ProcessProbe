@@ -10,8 +10,6 @@ namespace ProcessProbe
 {
     public class Probe
     {
-        private static readonly Dictionary<Type, bool> SafetyLookup = new();
-
         private readonly IMemoryInterface _memory;
 
         public Probe(Process process)

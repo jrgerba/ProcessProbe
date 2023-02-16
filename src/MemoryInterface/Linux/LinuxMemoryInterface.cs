@@ -5,7 +5,7 @@ namespace ProcessProbe.MemoryInterface.Linux
 {
     internal class LinuxMemoryInterface : IMemoryInterface
     {
-        private Process _proc;
+        private readonly Process _proc;
 
         public bool IsOpen { get; private set; }
 
@@ -13,8 +13,8 @@ namespace ProcessProbe.MemoryInterface.Linux
         {
             fixed (void* bufferPtr = buffer)
             {
-                var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
-                var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
+                iovec local = new() { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
+                iovec remote = new() { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
                 return Libc.process_vm_readv(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
@@ -23,8 +23,8 @@ namespace ProcessProbe.MemoryInterface.Linux
         {
             fixed (void* bufferPtr = buffer)
             {
-                var local = new iovec { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
-                var remote = new iovec { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
+                iovec local = new() { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
+                iovec remote = new() { iov_base = (void*)address, iov_len = (ulong)buffer.Length };
                 return Libc.process_vm_writev(_proc.Id, &local, 1, &remote, 1, 0);
             }
         }
@@ -34,7 +34,6 @@ namespace ProcessProbe.MemoryInterface.Linux
         public void CloseInterface()
         {
             IsOpen = false;
-            _proc.Dispose();
         }
 
         public LinuxMemoryInterface(Process proc)
