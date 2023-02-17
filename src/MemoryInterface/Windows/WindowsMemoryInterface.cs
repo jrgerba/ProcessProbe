@@ -25,7 +25,7 @@ namespace ProcessProbe.MemoryInterface.Windows
             fixed (byte* bufferPtr = buffer)
             {
                 if (!Kernel32.ReadProcessMemory(_handle, address, bufferPtr, buffer.Length, out int bytesRead))
-                    throw new AccessViolationException("Could not read from selected memory");
+                    throw new AccessViolationException($"Could not read from selected memory ({Marshal.GetLastWin32Error()})");
 
                 return bytesRead;
             }
