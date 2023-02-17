@@ -1,6 +1,6 @@
 ﻿namespace ProcessProbe.MemoryInterface
 {
-    internal interface IMemoryInterface
+    internal interface IMemoryInterface : IDisposable
     {
         public int Read(nint address, Span<byte> buffer);
 

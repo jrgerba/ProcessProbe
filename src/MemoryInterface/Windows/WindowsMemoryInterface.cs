@@ -5,7 +5,7 @@ using PeNet.Header.Pe;
 
 namespace ProcessProbe.MemoryInterface.Windows
 {
-    internal class WindowsMemoryInterface : IMemoryInterface
+    internal sealed class WindowsMemoryInterface : IMemoryInterface
     {
         private const int DesiredAccess = 0x0020 | 0x0010 | 0x0008 | 0x0400;
         private readonly Process _process;
@@ -90,7 +90,7 @@ namespace ProcessProbe.MemoryInterface.Windows
             }
         }
 
-        ~WindowsMemoryInterface()
+        public void Dispose()
         {
             CloseInterface();
             _process.Dispose();

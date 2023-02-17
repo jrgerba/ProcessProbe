@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ProcessProbe.MemoryInterface.Linux
 {
-    internal class LinuxMemoryInterface : IMemoryInterface
+    internal sealed class LinuxMemoryInterface : IMemoryInterface
     {
         private readonly Process _proc;
 
@@ -40,6 +40,12 @@ namespace ProcessProbe.MemoryInterface.Linux
         {
             _proc = proc;
             IsOpen = true;
+        }
+
+        public void Dispose()
+        {
+            CloseInterface();
+            _proc.Dispose();
         }
     }
 
