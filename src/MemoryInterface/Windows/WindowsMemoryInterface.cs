@@ -7,7 +7,10 @@ namespace ProcessProbe.MemoryInterface.Windows
 {
     internal sealed class WindowsMemoryInterface : IMemoryInterface
     {
-        private const int DesiredAccess = 0x0020 | 0x0010 | 0x0008 | 0x0400;
+        private static readonly int DesiredAccess = AccessRights.ProcesVmWrite.Value() 
+                                           | AccessRights.ProcessVmRead.Value() 
+                                           | AccessRights.ProcessVmOperation.Value() 
+                                           | AccessRights.ProcessQueryInformation.Value();
         private readonly Process _process;
         private readonly Dictionary<string, nint> _exportMap;
         private readonly nint _handle;
