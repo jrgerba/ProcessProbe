@@ -14,6 +14,9 @@ namespace ProcessProbe.MemoryInterface.Linux
 
         public unsafe int Read(nint address, Span<byte> buffer)
         {
+            if (!IsOpen)
+                throw new MemoryInterfaceClosedException();
+            
             fixed (void* bufferPtr = buffer)
             {
                 iovec local = new() { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
@@ -24,6 +27,9 @@ namespace ProcessProbe.MemoryInterface.Linux
 
         public unsafe int Write(nint address, Span<byte> buffer)
         {
+            if (!IsOpen)
+                throw new MemoryInterfaceClosedException();
+            
             fixed (void* bufferPtr = buffer)
             {
                 iovec local = new() { iov_base = bufferPtr, iov_len = (ulong)buffer.Length };
@@ -48,6 +54,11 @@ namespace ProcessProbe.MemoryInterface.Linux
             _proc = proc;
             _exportMap = new Dictionary<string, nint>();
             IsOpen = true;
+
+            proc.Exited += (_, _) =>
+            {
+                CloseInterface();
+            };
 
             if (_proc.MainModule is null)
                 return;
