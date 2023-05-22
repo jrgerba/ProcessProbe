@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ELFSharp" Version="2.17.1" />
     <PackageReference Include="PeNet" Version="3.0.0" />
   </ItemGroup>
 
