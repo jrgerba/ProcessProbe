@@ -59,6 +59,9 @@ namespace ProcessProbe.MemoryInterface.Windows
 
         private void OnProcessClosed(object? sender, EventArgs args) => CloseInterface();
 
+        private const string HandleFailError = "Handle creation failed with an error code {0}";
+        private const string MainModuleNullError = "The main module could not be found";
+
         public WindowsMemoryInterface(Process process)
         {
             _process = process;
@@ -66,7 +69,7 @@ namespace ProcessProbe.MemoryInterface.Windows
             _handle = Kernel32.OpenProcess(DesiredAccess, false, _process.Id);
 
             if (_handle == nint.Zero)
-                throw new CreateHandleFailedException($"Handle creation failed with an error code {Marshal.GetLastWin32Error()}");
+                throw new InterfaceCreationFailedException(String.Format(HandleFailError, Marshal.GetLastWin32Error()));
 
             _process.Exited += OnProcessClosed;
 
@@ -90,6 +93,8 @@ namespace ProcessProbe.MemoryInterface.Windows
                     }
                 }
             }
+            else
+                throw new InterfaceCreationFailedException(MainModuleNullError);
         }
 
         ~WindowsMemoryInterface()
