@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PeNet;
@@ -7,9 +5,12 @@ using PeNet.Header.Pe;
 
 namespace ProcessProbe.MemoryInterface.Windows
 {
-    internal class WindowsMemoryInterface : IMemoryInterface
+    internal sealed class WindowsMemoryInterface : IMemoryInterface
     {
-        private const int DesiredAccess = 0x0020 | 0x0010 | 0x0008 | 0x0400;
+        private static readonly int DesiredAccess = AccessRights.ProcesVmWrite.Value() 
+                                           | AccessRights.ProcessVmRead.Value() 
+                                           | AccessRights.ProcessVmOperation.Value() 
+                                           | AccessRights.ProcessQueryInformation.Value();
         private readonly Process _process;
         private readonly Dictionary<string, nint> _exportMap;
         private readonly nint _handle;
@@ -24,7 +25,7 @@ namespace ProcessProbe.MemoryInterface.Windows
             fixed (byte* bufferPtr = buffer)
             {
                 if (!Kernel32.ReadProcessMemory(_handle, address, bufferPtr, buffer.Length, out int bytesRead))
-                    throw new AccessViolationException("Could not read from selected memory");
+                    throw new AccessViolationException($"Could not read from selected memory ({Marshal.GetLastWin32Error()})");
 
                 return bytesRead;
             }
@@ -97,7 +98,7 @@ namespace ProcessProbe.MemoryInterface.Windows
                 throw new InterfaceCreationFailedException(MainModuleNullError);
         }
 
-        ~WindowsMemoryInterface()
+        public void Dispose()
         {
             CloseInterface();
             _process.Dispose();

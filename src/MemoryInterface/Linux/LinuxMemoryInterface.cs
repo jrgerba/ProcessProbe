@@ -5,7 +5,7 @@ using ELFSharp.ELF.Sections;
 
 namespace ProcessProbe.MemoryInterface.Linux
 {
-    internal class LinuxMemoryInterface : IMemoryInterface
+    internal sealed class LinuxMemoryInterface : IMemoryInterface
     {
         private readonly Process _proc;
         private readonly Dictionary<string, nint> _exportMap;
@@ -112,6 +112,12 @@ namespace ProcessProbe.MemoryInterface.Linux
 
             elf.Dispose();
             stream.Close();
+        }
+
+        public void Dispose()
+        {
+            CloseInterface();
+            _proc.Dispose();
         }
     }
 
